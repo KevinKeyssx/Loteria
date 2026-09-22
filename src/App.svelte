@@ -24,6 +24,12 @@
 		playAudioBuffer,
 		stopCurrentAudio
 	} from './lib/voice';
+	import {
+		initSounds,
+		playLotterySound,
+		playNumberSound,
+		stopAllSounds
+	} from './lib/sound';
 
 	let games: IGame[] = $state([]);
 	let activeId: string | null = $state( null );
@@ -51,6 +57,7 @@
 		games = loadGames();
 		activeId = games[ 0 ]?.id ?? null;
 		currentNumber = games[ 0 ]?.drawn[ 0 ] ?? null;
+		initSounds();
 
 		const unsubscribe: () => void = subscribeVoiceState(( state: IVoiceState ): void => {
 			voiceState = state;
@@ -60,6 +67,7 @@
 
 		return (): void => {
 			unsubscribe();
+			stopAllSounds();
 		};
 	});
 
@@ -88,11 +96,14 @@
 		}
 
 		stopCurrentAudio();
+		stopAllSounds();
+		playLotterySound();
 		isDrawing = true;
 		currentNumber = null;
 
 		const updated: IGame | null = drawNext( activeGame );
 		if ( !updated ) {
+			stopAllSounds();
 			isDrawing = false;
 			return;
 		}
@@ -110,7 +121,9 @@
 			currentNumber = nextNum;
 			isDrawing = false;
 
-			if ( audioGenerationPromise ) {
+			if ( !updated.enableVoice ) {
+				playNumberSound();
+			} else if ( audioGenerationPromise ) {
 				const buffer: AudioBuffer | null = await audioGenerationPromise;
 				playAudioBuffer( buffer );
 				audioGenerationPromise = null;
@@ -124,11 +137,14 @@
 		}
 
 		stopCurrentAudio();
+		stopAllSounds();
+		playLotterySound();
 		isDrawing = true;
 		currentNumber = null;
 
 		const updated: IGame | null = retryCurrentNumber( activeGame );
 		if ( !updated ) {
+			stopAllSounds();
 			isDrawing = false;
 			return;
 		}
@@ -146,7 +162,9 @@
 			currentNumber = nextNum;
 			isDrawing = false;
 
-			if ( audioGenerationPromise ) {
+			if ( !updated.enableVoice ) {
+				playNumberSound();
+			} else if ( audioGenerationPromise ) {
 				const buffer: AudioBuffer | null = await audioGenerationPromise;
 				playAudioBuffer( buffer );
 				audioGenerationPromise = null;
@@ -163,6 +181,8 @@
 	}
 
 	function reset( id: string ): void {
+		stopCurrentAudio();
+		stopAllSounds();
 		persist( games.map(( g: IGame ): IGame => g.id === id ? resetGame( g ) : g) );
 		if ( id === activeId ) {
 			currentNumber = null;
@@ -170,6 +190,8 @@
 	}
 
 	function remove( id: string ): void {
+		stopCurrentAudio();
+		stopAllSounds();
 		const next: IGame[] = deleteGame( id, games );
 		persist( next );
 		if ( id === activeId ) {
@@ -179,6 +201,8 @@
 	}
 
 	function select( id: string ): void {
+		stopCurrentAudio();
+		stopAllSounds();
 		activeId = id;
 		currentNumber = games.find(( g: IGame ): boolean => g.id === id)?.drawn[ 0 ] ?? null;
 	}
