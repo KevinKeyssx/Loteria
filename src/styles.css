@@ -1,0 +1,34 @@
+@import 'tailwindcss';
+
+@theme { --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif; }
+
+:root { font-family: var(--font-sans); color: #f8fafc; background: #080d1d; font-synthesis: none; }
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: #080d1d; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+.glow { box-shadow: 0 0 70px rgba(99, 102, 241, .22), inset 0 1px rgba(255,255,255,.08); }
+.number-glow { text-shadow: 0 0 24px rgba(129,140,248,.75), 0 0 80px rgba(45,212,191,.28); }
+@keyframes pop { 0% { transform: scale(.55) rotate(-8deg); opacity: 0; } 65% { transform: scale(1.08) rotate(2deg); opacity: 1; } 100% { transform: scale(1) rotate(0); } }
+.animate-pop { animation: pop .55s cubic-bezier(.2,.9,.2,1) both; }
+@keyframes shimmer { 0%,100% { opacity: .5; transform: translateX(-20%); } 50% { opacity: 1; transform: translateX(20%); } }
+.animate-shimmer { animation: shimmer 3.5s ease-in-out infinite; }
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+.animate-spin-slow { animation: spin-slow 18s linear infinite; }
+.shuffle-stage { position: relative; display: grid; min-height: 220px; width: min(100%, 360px); place-items: center; overflow: hidden; }
+.shuffle-number { position: relative; z-index: 2; font-size: clamp(5rem, 18vw, 8rem); font-weight: 900; line-height: 1; letter-spacing: -.09em; color: white; animation: number-flicker .16s steps(2, end) infinite; }
+.shuffle-icon { position: absolute; top: 18px; z-index: 3; display: grid; height: 34px; width: 34px; place-items: center; border: 1px solid rgba(129,140,248,.3); border-radius: 12px; color: #99f6e4; background: rgba(99,102,241,.15); animation: icon-float 1.2s ease-in-out infinite; }
+.shuffle-label { position: absolute; bottom: 4px; margin: 0; color: #a5b4fc; font-size: .7rem; font-weight: 800; letter-spacing: .28em; text-transform: uppercase; animation: label-pulse 1s ease-in-out infinite; }
+.shuffle-dots { position: absolute; bottom: 31px; display: flex; gap: 5px; }
+.shuffle-dots span { height: 4px; width: 4px; border-radius: 50%; background: #5eead4; animation: dot-bounce .9s ease-in-out infinite; }
+.shuffle-dots span:nth-child(2) { animation-delay: .15s; }.shuffle-dots span:nth-child(3) { animation-delay: .3s; }
+.shuffle-orbit { position: absolute; border: 1px solid rgba(129,140,248,.18); border-radius: 999px; transform: rotate(-20deg); }
+.orbit-one { height: 165px; width: 290px; animation: orbit-spin 2.8s linear infinite; }.orbit-two { height: 110px; width: 230px; border-color: rgba(45,212,191,.16); animation: orbit-spin 2s linear infinite reverse; }
+.shuffle-spark { position: absolute; color: #c4b5fd; animation: spark-drift 1.5s ease-in-out infinite; }.spark-one { left: 12%; top: 35%; }.spark-two { right: 14%; top: 42%; animation-delay: .4s; }
+@keyframes number-flicker { 0% { transform: translateY(-2px) scale(1.02); filter: blur(.4px); } 50% { transform: translateY(2px) scale(.98); filter: blur(0); } 100% { transform: translateY(-1px) scale(1); } }
+@keyframes icon-float { 50% { transform: translateY(-5px) rotate(12deg); box-shadow: 0 0 24px rgba(45,212,191,.2); } }
+@keyframes label-pulse { 50% { opacity: .45; letter-spacing: .36em; } }
+@keyframes dot-bounce { 0%,100% { transform: translateY(0); opacity: .35; } 50% { transform: translateY(-5px); opacity: 1; } }
+@keyframes orbit-spin { to { transform: rotate(340deg); } }
+@keyframes spark-drift { 50% { transform: translateY(-9px) scale(1.15) rotate(15deg); opacity: .55; } }
+@media (prefers-reduced-motion: reduce) { .shuffle-number, .shuffle-icon, .shuffle-label, .shuffle-dots span, .shuffle-orbit, .shuffle-spark { animation: none; } }
