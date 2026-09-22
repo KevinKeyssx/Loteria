@@ -240,22 +240,29 @@
 			<div class="grid gap-6 lg:grid-cols-[1fr_340px]">
 				<section class="glow relative overflow-hidden rounded-3xl border border-white/10 bg-white/4.5 p-6 sm:p-10">
 					<div class="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full border border-indigo-300/10 animate-spin-slow"></div>
-					<div class="mb-8 flex flex-wrap items-start justify-between gap-4">
+
+                    <div class="mb-8 flex flex-wrap items-start justify-between gap-4">
 						<div>
 							<div class="mb-2 flex items-center gap-2 text-sm font-bold text-slate-300">
-								<Hash size={ 15 } class="text-teal-300" /> { activeGame.name }
+								<Hash size={ 15 } class="text-violet-300" />
+
+                                <span class="text-violet-400">
+                                    { activeGame.name }
+                                </span>
 							</div>
-							<p class="text-xs text-slate-500">
+
+                            <p class="text-xs text-amber-500">
 								Rango { activeGame.start } — { activeGame.end } · { activeGame.canRepeat ? 'Números repetibles' : 'Sin repeticiones' }
 							</p>
 						</div>
-						<button
+
+                        <button
 							disabled={ activeGame.drawn.length === 0 || isDrawing }
 							onclick={ retryNumber }
-							class="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-bold text-slate-400 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+							class="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-bold text-violet-500 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
 							title="Descartar el número actual y sortear uno nuevo"
 						>
-							<RotateCcw size={ 14 } /> Reintentar
+							<RotateCcw size={ 18 } />
 						</button>
 					</div>
 
