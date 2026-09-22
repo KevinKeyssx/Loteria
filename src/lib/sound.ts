@@ -27,7 +27,7 @@ function getNumberAudio(): HTMLAudioElement | null {
 	if ( !numberAudio ) {
 		numberAudio         = new Audio( '/number.webm' );
 		numberAudio.preload = 'auto';
-        numberAudio.volume  = 0.3;
+        numberAudio.volume  = 0.22;
 	}
 
 	return numberAudio;
