@@ -3,7 +3,38 @@
 @theme { --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif; }
 
 :root { font-family: var(--font-sans); color: #f8fafc; background: #080d1d; font-synthesis: none; }
-* { box-sizing: border-box; }
+* {
+	box-sizing		: border-box;
+	scrollbar-width	: thin;
+	scrollbar-color	: rgba( 255, 255, 255, 0.16 ) transparent;
+}
+
+*::-webkit-scrollbar {
+	width	: 6px;
+	height	: 6px;
+}
+
+*::-webkit-scrollbar-track {
+	background	: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+	background		: rgba( 255, 255, 255, 0.16 );
+	border-radius	: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+	background	: rgba( 129, 140, 248, 0.45 );
+}
+
+*::-webkit-scrollbar-thumb:active {
+	background	: rgba( 129, 140, 248, 0.7 );
+}
+
+*::-webkit-scrollbar-corner {
+	background	: transparent;
+}
+
 body { margin: 0; min-width: 320px; min-height: 100vh; background: #080d1d; }
 button, input { font: inherit; }
 button { cursor: pointer; }
