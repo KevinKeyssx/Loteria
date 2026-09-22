@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Switch from './Switch.svelte';
-	import type { ISwitcherProps } from '../../types/game';
+	import type { ISwitcherProps } from '../../types/switch';
 
 	let {
 		title,

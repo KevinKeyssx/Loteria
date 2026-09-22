@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ISwitchProps } from '../../types/game';
+	import type { ISwitchProps } from '../../types/switch';
 
 	let {
 		checked		= $bindable( false ),
