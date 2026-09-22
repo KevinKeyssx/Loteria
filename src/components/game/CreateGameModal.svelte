@@ -1,22 +1,28 @@
 <script lang="ts">
 	import { X } from 'lucide-svelte';
-	import Switcher from '../inputs/Switcher.svelte';
-	import type { ICreateGameModalProps } from '../../types/game';
 
-	let {
+	import type {
+        ICreateGameModalProps
+    }               from '../../types/modal';
+    import Switcher from '../inputs/Switcher.svelte';
+	import Number   from '../inputs/Number.svelte';
+
+
+    let {
 		error		= '',
 		onClose,
 		onCreate
 	}: ICreateGameModalProps = $props();
 
-	let name: string = $state( 'Sorteo principal' );
-	let start: number = $state( 1 );
-	let end: number = $state( 90 );
-	let canRepeat: boolean = $state( false );
-	let enableVoice: boolean = $state( true );
-	let localError: string = $state( '' );
+	let name        : string    = $state( 'Sorteo principal' );
+	let start       : number    = $state( 1 );
+	let end         : number    = $state( 90 );
+	let canRepeat   : boolean   = $state( false );
+	let enableVoice : boolean   = $state( true );
+	let localError  : string    = $state( '' );
 
-	function handleSubmit(): void {
+
+    function handleSubmit(): void {
 		if ( !name.trim() ) {
 			localError = 'Ingresa un nombre para el juego.';
 			return;
@@ -28,12 +34,13 @@
 		}
 
 		localError = '';
-		onCreate({
+
+        onCreate({
 			name			: name.trim(),
-			start			: Number( start ),
-			end				: Number( end ),
-			canRepeat		: Boolean( canRepeat ),
-			enableVoice		: Boolean( enableVoice )
+			start,
+			end,
+			canRepeat,
+			enableVoice
 		});
 	}
 </script>
@@ -45,7 +52,8 @@
 				<p class="mb-1 text-xs font-bold uppercase tracking-[.2em] text-teal-300">Nuevo sorteo</p>
 				<h2 class="text-2xl font-black">Configura tu juego</h2>
 			</div>
-			<button onclick={ onClose } class="text-slate-500 transition hover:text-white" aria-label="Cerrar">
+
+            <button onclick={ onClose } class="text-slate-500 transition hover:text-white" aria-label="Cerrar">
 				<X size={ 20 } />
 			</button>
 		</div>
@@ -57,14 +65,14 @@
 			</label>
 
 			<div class="grid grid-cols-2 gap-3">
-				<label class="block text-sm font-bold text-slate-300">
-					Desde
-					<input type="number" bind:value={ start } class="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 outline-none focus:border-indigo-400" />
-				</label>
-				<label class="block text-sm font-bold text-slate-300">
-					Hasta
-					<input type="number" bind:value={ end } class="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 outline-none focus:border-indigo-400" />
-				</label>
+				<div>
+					<span class="mb-2 block text-sm font-bold text-slate-300">Desde</span>
+					<Number bind:value={ start } min={ 0 } max={ 9999 } />
+				</div>
+				<div>
+					<span class="mb-2 block text-sm font-bold text-slate-300">Hasta</span>
+					<Number bind:value={ end } min={ 1 } max={ 10000 } />
+				</div>
 			</div>
 
 			<Switcher
