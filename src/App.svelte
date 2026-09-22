@@ -314,8 +314,16 @@
 						onclick={ nextNumber }
 						class="mt-6 flex w-full items-center justify-center gap-3 rounded-2xl bg-linear-to-r from-indigo-400 to-violet-400 py-4 font-black text-indigo-100 shadow-lg shadow-indigo-500/20 transition hover:scale-[1.01] hover:from-indigo-300 hover:to-violet-300 disabled:cursor-not-allowed disabled:opacity-40"
 					>
-						<Play size={ 18 } fill="currentColor" /> { remaining === 0 ? 'Todos los números salieron' : 'Siguiente número' }
-						<span class="ml-2 rounded-full bg-slate-950/15 px-2 py-1 text-xs">
+						<Play size={ 18 } fill="currentColor" /> 
+
+                        { remaining === 0
+                            ? 'Juego terminado'
+                            : remaining === activeGame.end
+                                ? 'Empezar sorteo'
+                            : 'Siguiente número'
+                        }
+
+                        <span class="ml-2 rounded-full bg-slate-950/15 px-2 py-1 text-xs">
 							{ activeGame.canRepeat ? '∞ disponibles' : `${ remaining } restantes` }
 						</span>
 					</button>
