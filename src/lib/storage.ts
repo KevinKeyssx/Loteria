@@ -1,7 +1,9 @@
 import { compressToUTF16, decompressFromUTF16 } from 'lz-string';
 import type { IGame, INewGameParams } from '../types/game';
 
+
 const STORAGE_KEY: string = 'lumina-loteria-juegos';
+
 
 export function loadGames(): IGame[] {
 	if ( typeof localStorage === 'undefined' ) {
@@ -10,17 +12,20 @@ export function loadGames(): IGame[] {
 
 	try {
 		const raw: string | null = localStorage.getItem( STORAGE_KEY );
-		if ( !raw ) {
+
+        if ( !raw ) {
 			return [];
 		}
 
 		const decompressed: string = decompressFromUTF16( raw );
-		if ( !decompressed ) {
+
+        if ( !decompressed ) {
 			return [];
 		}
 
 		const parsed: unknown = JSON.parse( decompressed );
-		if ( !Array.isArray( parsed ) ) {
+
+        if ( !Array.isArray( parsed )) {
 			return [];
 		}
 
@@ -35,7 +40,7 @@ export function loadGames(): IGame[] {
 				drawn			: Array.isArray( item.drawn ) ? item.drawn.map( Number ) : [],
 				createdAt		: String( item.createdAt ?? new Date().toISOString() )
 			};
-		} );
+		});
 
 		return games;
 	} catch {
@@ -43,14 +48,18 @@ export function loadGames(): IGame[] {
 	}
 }
 
+
 export function saveGames( games: IGame[] ): void {
 	if ( typeof localStorage === 'undefined' ) {
 		return;
 	}
-	const serialized: string = JSON.stringify( games );
+
+    const serialized: string = JSON.stringify( games );
 	const compressed: string = compressToUTF16( serialized );
-	localStorage.setItem( STORAGE_KEY, compressed );
+
+    localStorage.setItem( STORAGE_KEY, compressed );
 }
+
 
 export function createGame( params: INewGameParams ): IGame {
 	return {
@@ -64,6 +73,7 @@ export function createGame( params: INewGameParams ): IGame {
 		createdAt		: new Date().toISOString()
 	};
 }
+
 
 export function drawNext( game: IGame ): IGame | null {
 	const totalLength: number = Math.max( 0, game.end - game.start + 1 );
@@ -79,14 +89,15 @@ export function drawNext( game: IGame ): IGame | null {
 		return null;
 	}
 
-	const randomIndex: number = Math.floor( Math.random() * available.length );
-	const selectedNumber: number = available[ randomIndex ];
+	const randomIndex       : number = Math.floor( Math.random() * available.length );
+	const selectedNumber    : number = available[ randomIndex ];
 
 	return {
 		...game,
 		drawn			: [ selectedNumber, ...game.drawn ]
 	};
 }
+
 
 export function retryCurrentNumber( game: IGame ): IGame | null {
 	if ( game.drawn.length === 0 ) {
@@ -107,14 +118,15 @@ export function retryCurrentNumber( game: IGame ): IGame | null {
 		return null;
 	}
 
-	const randomIndex: number = Math.floor( Math.random() * available.length );
-	const selectedNumber: number = available[ randomIndex ];
+	const randomIndex       : number = Math.floor( Math.random() * available.length );
+	const selectedNumber    : number = available[ randomIndex ];
 
 	return {
 		...game,
 		drawn			: [ selectedNumber, ...drawnWithoutCurrent ]
 	};
 }
+
 
 export function updateGameVoice( id: string, games: IGame[], enableVoice: boolean ): IGame[] {
 	const updated: IGame[] = games.map( ( game: IGame ): IGame => {
@@ -124,12 +136,15 @@ export function updateGameVoice( id: string, games: IGame[], enableVoice: boolea
 				enableVoice
 			};
 		}
-		return game;
-	} );
+
+        return game;
+	});
 
 	saveGames( updated );
-	return updated;
+
+    return updated;
 }
+
 
 export function resetGame( game: IGame ): IGame {
 	return {
@@ -138,8 +153,11 @@ export function resetGame( game: IGame ): IGame {
 	};
 }
 
+
 export function deleteGame( id: string, games: IGame[] ): IGame[] {
 	const filtered: IGame[] = games.filter( ( game: IGame ): boolean => game.id !== id );
-	saveGames( filtered );
-	return filtered;
+
+    saveGames( filtered );
+
+    return filtered;
 }
