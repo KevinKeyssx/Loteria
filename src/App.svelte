@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Sparkles, Plus, Settings2, RotateCcw, Play, Trophy, Hash, X, Volume2, VolumeX, Loader2 } from 'lucide-svelte';
+	import { Sparkles, Plus, Settings2, RotateCcw, Play, Trophy, Hash, Volume2, VolumeX, Loader2 } from 'lucide-svelte';
 	import AdminPanel from './AdminPanel.svelte';
 	import NumberShuffle from './NumberShuffle.svelte';
 	import FloatingStars from './FloatingStars.svelte';
+	import CreateGameModal from './components/game/CreateGameModal.svelte';
+	import Switch from './components/inputs/Switch.svelte';
 	import type { IGame, INewGameParams, IVoiceState } from './types/game';
 	import {
 		loadGames,
@@ -25,11 +27,6 @@
 
 	let games: IGame[] = $state([]);
 	let activeId: string | null = $state( null );
-	let newName: string = $state( 'Sorteo principal' );
-	let start: number = $state( 1 );
-	let end: number = $state( 90 );
-	let canRepeat: boolean = $state( false );
-	let enableVoice: boolean = $state( true );
 	let showCreate: boolean = $state( false );
 	let showAdmin: boolean = $state( false );
 	let isDrawing: boolean = $state( false );
@@ -71,28 +68,18 @@
 		saveGames( next );
 	}
 
-	function newGame(): void {
+	function handleCreateGame( params: INewGameParams ): void {
 		error = '';
-		if ( !newName.trim() || start < 0 || end <= start || end - start > 9999 ) {
+		if ( !params.name.trim() || params.start < 0 || params.end <= params.start || params.end - params.start > 9999 ) {
 			error = 'Revisa el nombre y el rango (máximo 10.000 números).';
 			return;
 		}
-
-		const params: INewGameParams = {
-			name			: newName.trim(),
-			start,
-			end,
-			canRepeat,
-			enableVoice
-		};
 
 		const game: IGame = createGame( params );
 		persist([ game, ...games ]);
 		activeId = game.id;
 		showCreate = false;
 		currentNumber = null;
-		canRepeat = false;
-		enableVoice = true;
 	}
 
 	function nextNumber(): void {
@@ -332,18 +319,12 @@
 								</div>
 							</div>
 
-							<button
-								type="button"
-								role="switch"
+							<Switch
+								checked={ activeGame.enableVoice && voiceState.isReady }
 								disabled={ !voiceState.isReady }
-								aria-checked={ activeGame.enableVoice && voiceState.isReady }
-								onclick={ toggleVoice }
-								class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-300/70 disabled:cursor-not-allowed disabled:opacity-40 { activeGame.enableVoice && voiceState.isReady ? 'bg-teal-400' : 'bg-slate-700' }"
-								title={ !voiceState.isReady ? 'Descargando modelo de voz...' : 'Activar o desactivar voz' }
-							>
-								<span class="sr-only">Activar o desactivar voz</span>
-								<span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out { activeGame.enableVoice && voiceState.isReady ? 'translate-x-5' : 'translate-x-0' }"></span>
-							</button>
+								label="Cantar números con voz chilena"
+								onchange={ () => toggleVoice() }
+							/>
 						</div>
 
 						{#if !voiceState.isReady }
@@ -411,67 +392,11 @@
 	</main>
 
 	{#if showCreate }
-		<div class="fixed inset-0 z-20 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
-			<section class="w-full max-w-md rounded-3xl border border-white/10 bg-[#11182e] p-7 shadow-2xl">
-				<div class="mb-6 flex items-start justify-between">
-					<div>
-						<p class="mb-1 text-xs font-bold uppercase tracking-[.2em] text-teal-300">Nuevo sorteo</p>
-						<h2 class="text-2xl font-black">Configura tu juego</h2>
-					</div>
-					<button onclick={ () => showCreate = false } class="text-slate-500 hover:text-white" aria-label="Cerrar">
-						<X size={ 20 } />
-					</button>
-				</div>
-
-				<div class="space-y-4">
-					<label class="block text-sm font-bold text-slate-300">
-						Nombre del juego
-						<input bind:value={ newName } class="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 outline-none transition focus:border-indigo-400" placeholder="Ej. Rifa de verano" />
-					</label>
-
-					<div class="grid grid-cols-2 gap-3">
-						<label class="block text-sm font-bold text-slate-300">
-							Desde
-							<input type="number" bind:value={ start } class="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 outline-none focus:border-indigo-400" />
-						</label>
-						<label class="block text-sm font-bold text-slate-300">
-							Hasta
-							<input type="number" bind:value={ end } class="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 outline-none focus:border-indigo-400" />
-						</label>
-					</div>
-
-					<label class="flex cursor-pointer items-center justify-between rounded-xl border border-white/10 bg-white/3 p-4">
-						<span>
-							<span class="block text-sm font-bold text-slate-200">Permitir repeticiones</span>
-							<span class="mt-1 block text-xs font-normal text-slate-500">Un número puede volver a salir en este juego</span>
-						</span>
-						<input type="checkbox" bind:checked={ canRepeat } class="peer sr-only" />
-						<span class="relative h-6 w-11 rounded-full bg-slate-700 transition peer-checked:bg-teal-400 peer-focus-visible:ring-2 peer-focus-visible:ring-teal-300/70">
-							<span class="absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition peer-checked:translate-x-5"></span>
-						</span>
-					</label>
-
-					<label class="flex cursor-pointer items-center justify-between rounded-xl border border-white/10 bg-white/3 p-4">
-						<span>
-							<span class="block text-sm font-bold text-slate-200">Cantar números con voz chilena</span>
-							<span class="mt-1 block text-xs font-normal text-slate-500">Locución con frases dinámicas al sortear</span>
-						</span>
-						<input type="checkbox" bind:checked={ enableVoice } class="peer sr-only" />
-						<span class="relative h-6 w-11 rounded-full bg-slate-700 transition peer-checked:bg-teal-400 peer-focus-visible:ring-2 peer-focus-visible:ring-teal-300/70">
-							<span class="absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition peer-checked:translate-x-5"></span>
-						</span>
-					</label>
-
-					{#if error }
-						<p class="rounded-xl bg-rose-400/10 p-3 text-xs font-bold text-rose-300">{ error }</p>
-					{/if}
-
-					<button onclick={ newGame } class="mt-2 w-full rounded-xl bg-indigo-400 py-3.5 font-black text-slate-950 transition hover:bg-indigo-300">
-						Crear juego
-					</button>
-				</div>
-			</section>
-		</div>
+		<CreateGameModal
+			{ error }
+			onClose={ () => showCreate = false }
+			onCreate={ handleCreateGame }
+		/>
 	{/if}
 
 	{#if showAdmin }
