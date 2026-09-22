@@ -384,12 +384,14 @@
 				</section>
 
 				<aside class="rounded-3xl border border-white/10 bg-white/[.035] p-5">
-					<div class="mb-5 flex items-center justify-between">
+					<div class="flex items-center justify-between">
 						<div>
 							<p class="text-sm font-black">Historial</p>
-							<p class="text-xs text-slate-500">{ activeGame.drawn.length } números salidos</p>
+
+                            <p class="text-xs text-slate-500">{ activeGame.drawn.length } números salidos</p>
 						</div>
-						<div class="rounded-lg bg-teal-400/10 px-2 py-1 text-xs font-black text-teal-300">EN VIVO</div>
+
+                        <div class="rounded-lg bg-teal-400/10 px-2 py-1 text-xs font-black text-teal-300">EN VIVO</div>
 					</div>
 
 					{#if activeGame.drawn.length === 0 }
@@ -397,11 +399,12 @@
 							Tu historial aparecerá<br />aquí al comenzar.
 						</div>
 					{:else}
-						<div class="grid max-h-117.5 grid-cols-3 gap-2 overflow-y-auto pr-1 sm:grid-cols-4 lg:grid-cols-3">
+						<div class="grid max-h-122 grid-cols-3 gap-2 overflow-y-auto pt-5 pr-1 sm:grid-cols-4 lg:grid-cols-3">
 							{#each activeGame.drawn as number, i ( `${ number }-${ i }` ) }
 								<div class="group relative rounded-xl border border-white/10 bg-white/5 py-3 text-center transition hover:border-indigo-300/40 hover:bg-indigo-400/10">
 									<span class="text-lg font-black">{ number }</span>
-									{#if i === 0 }
+
+                                    {#if i === 0 }
 										<span class="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-teal-300 shadow-[0_0_10px_#5eead4]"></span>
 									{/if}
 								</div>
