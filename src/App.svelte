@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Sparkles, Plus, Settings2, RotateCcw, Play, Trophy, Hash, Volume2, VolumeX, Loader2 } from 'lucide-svelte';
-	import AdminPanel from './AdminPanel.svelte';
-	import NumberShuffle from './NumberShuffle.svelte';
-	import FloatingStars from './FloatingStars.svelte';
-	import CreateGameModal from './components/game/CreateGameModal.svelte';
-	import Switch from './components/inputs/Switch.svelte';
-	import type { IGame, INewGameParams, IVoiceState } from './types/game';
+
+    import { Sparkles, Plus, Settings2, RotateCcw, Play, Trophy, Hash, Volume2, VolumeX, LoaderCircle } from 'lucide-svelte';
+
+	import type {
+        IGame,
+        INewGameParams,
+        IVoiceState
+    }                       from './types/game';
 	import {
 		loadGames,
 		saveGames,
@@ -16,35 +17,41 @@
 		resetGame,
 		deleteGame,
 		updateGameVoice
-	} from './lib/storage';
+	}                       from './lib/storage';
 	import {
 		initVoiceEngine,
 		subscribeVoiceState,
 		prepareGameAudio,
 		playAudioBuffer,
 		stopCurrentAudio
-	} from './lib/voice';
+	}                       from './lib/voice';
 	import {
 		initSounds,
 		playLotterySound,
 		playNumberSound,
 		stopAllSounds
-	} from './lib/sound';
+	}                       from './lib/sound';
+    import AdminPanel       from './AdminPanel.svelte';
+	import NumberShuffle    from './NumberShuffle.svelte';
+	import FloatingStars    from './FloatingStars.svelte';
+	import CreateGameModal  from './components/game/CreateGameModal.svelte';
+	import History          from './components/game/History.svelte';
+	import Switch           from './components/inputs/Switch.svelte';
 
-	let games: IGame[] = $state([]);
-	let activeId: string | null = $state( null );
-	let showCreate: boolean = $state( false );
-	let showAdmin: boolean = $state( false );
-	let isDrawing: boolean = $state( false );
-	let currentNumber: number | null = $state( null );
-	let error: string = $state( '' );
-	let audioGenerationPromise: Promise<AudioBuffer | null> | null = null;
 
-	let voiceState: IVoiceState = $state({
+    let games                   : IGame[]                               = $state([]);
+	let activeId                : string | null                         = $state( null );
+	let showCreate              : boolean                               = $state( false );
+	let showAdmin               : boolean                               = $state( false );
+	let isDrawing               : boolean                               = $state( false );
+	let currentNumber           : number | null                         = $state( null );
+	let error                   : string                                = $state( '' );
+	let audioGenerationPromise  : Promise<AudioBuffer | null> | null    = null;
+	let voiceState              : IVoiceState                           = $state({
 		isReady			: false,
 		isLoading		: false,
 		progress		: 0,
-		statusText		: 'Preparando voz chilena natural...',
+		statusText		: 'Preparando voz natural...',
 		error			: null
 	});
 
@@ -53,11 +60,13 @@
 		activeGame ? ( activeGame.canRepeat ? Infinity : activeGame.end - activeGame.start + 1 - activeGame.drawn.length ) : 0
 	);
 
-	onMount(() => {
-		games = loadGames();
-		activeId = games[ 0 ]?.id ?? null;
-		currentNumber = games[ 0 ]?.drawn[ 0 ] ?? null;
-		initSounds();
+
+    onMount(() => {
+		games           = loadGames();
+		activeId        = games[ 0 ]?.id            ?? null;
+		currentNumber   = games[ 0 ]?.drawn[ 0 ]    ?? null;
+
+        initSounds();
 
 		const unsubscribe: () => void = subscribeVoiceState(( state: IVoiceState ): void => {
 			voiceState = state;
@@ -71,26 +80,33 @@
 		};
 	});
 
-	function persist( next: IGame[] ): void {
+
+    function persist( next: IGame[] ): void {
 		games = next;
 		saveGames( next );
 	}
 
-	function handleCreateGame( params: INewGameParams ): void {
+
+    function handleCreateGame( params: INewGameParams ): void {
 		error = '';
-		if ( !params.name.trim() || params.start < 0 || params.end <= params.start || params.end - params.start > 9999 ) {
+
+        if ( !params.name.trim() || params.start < 0 || params.end <= params.start || params.end - params.start > 9999 ) {
 			error = 'Revisa el nombre y el rango (máximo 10.000 números).';
-			return;
+
+            return;
 		}
 
 		const game: IGame = createGame( params );
-		persist([ game, ...games ]);
-		activeId = game.id;
-		showCreate = false;
-		currentNumber = null;
+
+        persist([ game, ...games ]);
+
+        activeId        = game.id;
+		showCreate      = false;
+		currentNumber   = null;
 	}
 
-	function nextNumber(): void {
+
+    function nextNumber(): void {
 		if ( !activeGame || isDrawing || remaining === 0 ) {
 			return;
 		}
@@ -98,18 +114,23 @@
 		stopCurrentAudio();
 		stopAllSounds();
 		playLotterySound();
-		isDrawing = true;
-		currentNumber = null;
+
+        isDrawing       = true;
+		currentNumber   = null;
 
 		const updated: IGame | null = drawNext( activeGame );
-		if ( !updated ) {
+
+        if ( !updated ) {
 			stopAllSounds();
-			isDrawing = false;
-			return;
+
+            isDrawing = false;
+
+            return;
 		}
 
 		const nextNum: number = updated.drawn[ 0 ];
-		audioGenerationPromise = prepareGameAudio( nextNum, updated.enableVoice );
+
+        audioGenerationPromise = prepareGameAudio( nextNum, updated.enableVoice );
 
 		setTimeout(async (): Promise<void> => {
 			if ( !activeGame ) {
@@ -118,15 +139,18 @@
 			}
 
 			persist( games.map(( g: IGame ): IGame => g.id === activeId ? updated : g) );
-			currentNumber = nextNum;
-			isDrawing = false;
+
+            currentNumber   = nextNum;
+			isDrawing       = false;
 
 			if ( !updated.enableVoice ) {
 				playNumberSound();
 			} else if ( audioGenerationPromise ) {
 				const buffer: AudioBuffer | null = await audioGenerationPromise;
-				playAudioBuffer( buffer );
-				audioGenerationPromise = null;
+
+                playAudioBuffer( buffer );
+
+                audioGenerationPromise = null;
 			}
 		}, 1050 );
 	}
@@ -139,72 +163,92 @@
 		stopCurrentAudio();
 		stopAllSounds();
 		playLotterySound();
-		isDrawing = true;
-		currentNumber = null;
+
+        isDrawing       = true;
+		currentNumber   = null;
 
 		const updated: IGame | null = retryCurrentNumber( activeGame );
-		if ( !updated ) {
+
+        if ( !updated ) {
 			stopAllSounds();
-			isDrawing = false;
-			return;
+
+            isDrawing = false;
+
+            return;
 		}
 
 		const nextNum: number = updated.drawn[ 0 ];
-		audioGenerationPromise = prepareGameAudio( nextNum, updated.enableVoice );
+
+        audioGenerationPromise = prepareGameAudio( nextNum, updated.enableVoice );
 
 		setTimeout(async (): Promise<void> => {
 			if ( !activeGame ) {
 				isDrawing = false;
-				return;
+
+                return;
 			}
 
 			persist( games.map(( g: IGame ): IGame => g.id === activeId ? updated : g) );
-			currentNumber = nextNum;
-			isDrawing = false;
+
+            currentNumber   = nextNum;
+			isDrawing       = false;
 
 			if ( !updated.enableVoice ) {
 				playNumberSound();
 			} else if ( audioGenerationPromise ) {
 				const buffer: AudioBuffer | null = await audioGenerationPromise;
-				playAudioBuffer( buffer );
-				audioGenerationPromise = null;
+
+                playAudioBuffer( buffer );
+
+                audioGenerationPromise = null;
 			}
 		}, 1050 );
 	}
 
-	function toggleVoice(): void {
+
+    function toggleVoice(): void {
 		if ( !activeGame || !voiceState.isReady ) {
 			return;
 		}
-		const nextState: boolean = !activeGame.enableVoice;
-		games = updateGameVoice( activeGame.id, games, nextState );
+
+        const nextState: boolean = !activeGame.enableVoice;
+
+        games = updateGameVoice( activeGame.id, games, nextState );
 	}
 
-	function reset( id: string ): void {
+
+    function reset( id: string ): void {
 		stopCurrentAudio();
 		stopAllSounds();
 		persist( games.map(( g: IGame ): IGame => g.id === id ? resetGame( g ) : g) );
-		if ( id === activeId ) {
+
+        if ( id === activeId ) {
 			currentNumber = null;
 		}
 	}
 
-	function remove( id: string ): void {
+
+    function remove( id: string ): void {
 		stopCurrentAudio();
 		stopAllSounds();
-		const next: IGame[] = deleteGame( id, games );
-		persist( next );
-		if ( id === activeId ) {
+
+        const next: IGame[] = deleteGame( id, games );
+
+        persist( next );
+
+        if ( id === activeId ) {
 			activeId = next[ 0 ]?.id ?? null;
 			currentNumber = next[ 0 ]?.drawn[ 0 ] ?? null;
 		}
 	}
 
-	function select( id: string ): void {
+
+    function select( id: string ): void {
 		stopCurrentAudio();
 		stopAllSounds();
-		activeId = id;
-		currentNumber = games.find(( g: IGame ): boolean => g.id === id)?.drawn[ 0 ] ?? null;
+
+        activeId        = id;
+		currentNumber   = games.find(( g: IGame ): boolean => g.id === id)?.drawn[ 0 ] ?? null;
 	}
 </script>
 
@@ -261,7 +305,7 @@
 				</div>
 			</div>
 		{:else}
-			<div class="grid gap-6 lg:grid-cols-[1fr_340px]">
+			<div class="grid gap-6 lg:grid-cols-[1fr_390px]">
 				<section class="glow relative overflow-hidden rounded-3xl border border-white/10 bg-white/4.5 p-6 sm:p-10">
 					<div class="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full border border-indigo-300/10 animate-spin-slow"></div>
 
@@ -333,7 +377,7 @@
 							<div class="flex items-center gap-3">
 								{#if !voiceState.isReady }
 									<div class="rounded-lg bg-indigo-500/15 p-2 text-indigo-300">
-										<Loader2 size={ 18 } class="animate-spin" />
+										<LoaderCircle size={ 18 } class="animate-spin" />
 									</div>
 								{:else if activeGame.enableVoice }
 									<div class="rounded-lg bg-teal-400/15 p-2 text-teal-300">
@@ -345,7 +389,7 @@
 									</div>
 								{/if}
 								<div>
-									<span class="block text-xs font-bold text-slate-200">Cantar números con voz chilena</span>
+									<span class="block text-xs font-bold text-slate-200">Cantar números con voz</span>
 									<span class="block text-[11px] text-slate-400">
 										{#if !voiceState.isReady }
 											{ voiceState.statusText }
@@ -361,7 +405,7 @@
 							<Switch
 								checked={ activeGame.enableVoice && voiceState.isReady }
 								disabled={ !voiceState.isReady }
-								label="Cantar números con voz chilena"
+								label="Cantar números con voz"
 								onchange={ () => toggleVoice() }
 							/>
 						</div>
@@ -383,35 +427,13 @@
 					</div>
 				</section>
 
-				<aside class="rounded-3xl border border-white/10 bg-white/[.035] p-5">
-					<div class="flex items-center justify-between">
-						<div>
-							<p class="text-sm font-black">Historial</p>
-
-                            <p class="text-xs text-slate-500">{ activeGame.drawn.length } números salidos</p>
-						</div>
-
-                        <div class="rounded-lg bg-teal-400/10 px-2 py-1 text-xs font-black text-teal-300">EN VIVO</div>
-					</div>
-
-					{#if activeGame.drawn.length === 0 }
-						<div class="grid h-64 place-items-center rounded-2xl border border-dashed border-white/10 text-center text-sm text-slate-500">
-							Tu historial aparecerá<br />aquí al comenzar.
-						</div>
-					{:else}
-						<div class="grid max-h-122 grid-cols-3 gap-2 overflow-y-auto pt-5 pr-1 sm:grid-cols-4 lg:grid-cols-3">
-							{#each activeGame.drawn as number, i ( `${ number }-${ i }` ) }
-								<div class="group relative rounded-xl border border-white/10 bg-white/5 py-3 text-center transition hover:border-indigo-300/40 hover:bg-indigo-400/10">
-									<span class="text-lg font-black">{ number }</span>
-
-                                    {#if i === 0 }
-										<span class="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-teal-300 shadow-[0_0_10px_#5eead4]"></span>
-									{/if}
-								</div>
-							{/each}
-						</div>
-					{/if}
-				</aside>
+				<History
+					drawn={ activeGame.drawn }
+					{ currentNumber }
+					gameId={ activeGame.id }
+					start={ activeGame.start }
+					end={ activeGame.end }
+				/>
 			</div>
 		{/if}
 
