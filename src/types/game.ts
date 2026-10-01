@@ -62,3 +62,5 @@ export interface IStarParticle {
 	type			: 'star' | 'dot';
 	glow			: string;
 }
+
+export * from './cardboard';
